@@ -2,7 +2,7 @@ version: 2.1
 
 executors:
   python-executor:
-    working_directory: ~/python3-template
+    working_directory: ~/spiking-neural-network
     docker:
       - image: circleci/python:3.8
 
@@ -36,7 +36,7 @@ jobs:
           name: Run Tests
           command: |
             source env/bin/activate
-            pytest --cov-branch --cov sample_package
+            pytest --cov-branch --cov snn
 
       - run:
           name: Upload coverage report
@@ -53,8 +53,8 @@ jobs:
           name: Run black, isort
           command: |
             source env/bin/activate
-            black --check sample_package tests
-            isort sample_package tests
+            black --check snn tests
+            isort snn tests
 
 workflows:
   main:
