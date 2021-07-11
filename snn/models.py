@@ -40,6 +40,7 @@ class Neuron:
         """
         if self.rest:
             self.rest -= 1
+            self.potential = self.rest_potential
             return False, self.potential
 
         if self.potential > self.min_potential:
