@@ -6,6 +6,8 @@ from .configs import NeuronConfig
 
 
 class Neuron:
+    """Leaky Integrate-and-Fire modeling neuron"""
+
     def __init__(self, cfg: NeuronConfig):
         """
         Initialize neuron
@@ -121,3 +123,53 @@ class Synapse:
     @staticmethod
     def random_initialize(weight: np.ndarray) -> np.ndarray:
         return np.random.uniform(0.0, 1.0, weight.shape)
+
+
+class ReceptiveField:
+    """On-centered receptive field to read image"""
+
+    def __init__(self, window_shape: Tuple[int, int], pad: bool = True, initializer: Callable = None):
+        """
+        Initialze receptive field
+
+        :param window_shape: a tuple of windows sizes [NumWindowRows, NumWindowColumns]
+        :param pad: if True, pad to keep size of output potentials as image shape
+        :param initializer: weight initializer function of which argument is zero weight and return is initialized weight
+        """
+        assert window_shape[0] % 2 == 1 and window_shape[1] % 2 == 1, "Window shape should be odd!"
+
+        self.window_shape = window_shape
+        self.pad = pad
+        self.weight = np.zeros(window_shape, np.float32)
+        self.origin = (window_shape[0] // 2, window_shape[1] // 2)
+
+        if initializer is None:
+            initializer = self.initialize
+        self.weight = initializer(self.weight)
+
+        assert (
+            self.weight.shape == window_shape
+        ), f"Initialized weight shape {self.weight.shape} is different from {window_shape}!"
+
+    def __call__(self, input_potentials: List[List[float]]):
+        if self.pad:
+            row_pad, column_pad = self.origin
+            input_potentials = np.pad(input_potentials, [(row_pad, row_pad), (column_pad, column_pad)])
+
+        sliding_windows = np.lib.stride_tricks.sliding_window_view(input_potentials, self.window_shape)
+        output_potentials = np.einsum("ij,klij->kl", self.weight, sliding_windows)
+        return output_potentials
+
+    @staticmethod
+    def initialize(weight: np.ndarray) -> np.ndarray:
+        """Initialze weight by Manhattan Distance from center"""
+        window_shape = weight.shape
+        origin = (window_shape[0] // 2, window_shape[1] // 2)
+
+        row_distance = np.abs(np.arange(window_shape[0]) - origin[0])
+        column_distance = np.abs(np.arange(window_shape[1]) - origin[1])
+        column_distance = np.expand_dims(column_distance, axis=-1)
+        distance = np.zeros_like(weight) + row_distance + column_distance
+
+        weight = -0.375 * distance + 1.0
+        return weight
