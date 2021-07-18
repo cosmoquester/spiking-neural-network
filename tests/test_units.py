@@ -1,8 +1,9 @@
 import numpy as np
+import pytest
 
 from snn.configs import NeuronConfig
 from snn.input import RandomStimulator
-from snn.units import Neuron, Neurons, Synapse
+from snn.units import Neuron, Neurons, ReceptiveField, Synapse
 
 cfg = NeuronConfig(
     rest_potential=0.0,
@@ -46,6 +47,9 @@ def test_neurons():
     fire_spikes, output_potentials = neurons(stimulator())
     assert len(fire_spikes) == len(output_potentials) == num_neurons
 
+    with pytest.raises(AssertionError):
+        neurons([0.1])
+
 
 def test_synapse():
     num_presynaptic_neurons = 2
@@ -75,3 +79,41 @@ def test_synapse():
     potentials = [1.0, 2.0, 3.0, 4.0, 5.0]
     weighted_potentials = synapse(potentials)
     assert np.all(weighted_potentials[0] != weighted_potentials[1])
+
+    with pytest.raises(AssertionError):
+        Synapse(3, 5, lambda x: np.array([1, 2, 3]))
+    with pytest.raises(AssertionError):
+        synapse = Synapse(3, 5)
+        synapse([1, 2])
+
+
+def test_receptive_field():
+    receptive_field = ReceptiveField((5, 5), pad=False)
+    np.testing.assert_equal(
+        receptive_field.weight,
+        [
+            [-0.5, -0.125, 0.25, -0.125, -0.5],
+            [-0.125, 0.25, 0.625, 0.25, -0.125],
+            [0.25, 0.625, 1.0, 0.625, 0.25],
+            [-0.125, 0.25, 0.625, 0.25, -0.125],
+            [-0.5, -0.125, 0.25, -0.125, -0.5],
+        ],
+    )
+    output = receptive_field(np.ones([5, 5], np.float32))
+    np.testing.assert_equal(output, 2.5)
+
+    receptive_field = ReceptiveField((3, 5), initializer=np.ones_like)
+    output = receptive_field(np.arange(15).reshape([3, 5]))
+    np.testing.assert_equal(
+        output,
+        [
+            [21.0, 32.0, 45.0, 40.0, 33.0],
+            [54.0, 78.0, 105.0, 90.0, 72.0],
+            [51.0, 72.0, 95.0, 80.0, 63.0],
+        ],
+    )
+
+    with pytest.raises(AssertionError):
+        ReceptiveField((3, 4))
+    with pytest.raises(AssertionError):
+        ReceptiveField((5, 5), initializer=lambda x: np.array([1, 2, 3]))
