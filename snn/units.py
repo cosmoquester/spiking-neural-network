@@ -1,4 +1,6 @@
-from typing import List, Tuple
+from typing import Callable, List, Tuple
+
+import numpy as np
 
 from .configs import NeuronConfig
 
@@ -66,15 +68,55 @@ class Neurons:
         ), "The number of potential is different from the number of neurons!"
 
         fire_spikes = []
-        output_potentials = []
+        neuron_potentials = []
         for input_potential, neuron in zip(input_potentials, self.neurons):
-            fire_spike, output_potential = neuron(input_potential)
+            fire_spike, neuron_potential = neuron(input_potential)
             fire_spikes.append(fire_spike)
-            output_potentials.append(output_potential)
+            neuron_potentials.append(neuron_potential)
 
-        return fire_spikes, output_potentials
+        return fire_spikes, neuron_potentials
 
     def reset(self):
         """Reset neuron's status"""
         for neuron in self.neurons:
             neuron.reset()
+
+
+class Synapse:
+    """A bunch of synapse weights connecting multiple presynaptic neurons to postsynaptic neurons"""
+
+    def __init__(self, num_presynaptic_neurons: int, num_postsynaptic_neurons: int, initializer: Callable = None):
+        """
+        Initialze synapse
+
+        :param num_presynaptic_neurons: the number of presynaptic neurons
+        :param num_postsynaptic_neurons: the number of postsynaptic neurons
+        :param initializer: weight initializer function of which argument is zero weight and return is initialized weight
+        """
+        self.weight = np.zeros([num_presynaptic_neurons, num_postsynaptic_neurons])
+
+        if initializer is None:
+            initializer = self.random_initialize
+        self.weight = initializer(self.weight)
+        assert self.weight.shape == (
+            num_presynaptic_neurons,
+            num_postsynaptic_neurons,
+        ), f"Initialized weight shape {self.weight.shape} is different from ({num_presynaptic_neurons}, {num_postsynaptic_neurons})!"
+
+    def __call__(self, input_potentials: List[float]) -> List[float]:
+        """
+        Multiply synapse weight about input_potentials and return weighted potentials
+
+        :param input_potentials: input potentials shaped [NumPresynapticNeurons]
+        :returns: weighted potentials shaped [NumPostsynapticNeurons]
+        """
+        assert len(input_potentials) == len(
+            self.weight
+        ), f"the number of input_potentials {len(input_potentials)} is different from {len(self.weight)}!"
+
+        weighted_potentials = np.matmul(input_potentials, self.weight)
+        return weighted_potentials
+
+    @staticmethod
+    def random_initialize(weight: np.ndarray) -> np.ndarray:
+        return np.random.uniform(0.0, 1.0, weight.shape)
