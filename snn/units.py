@@ -98,6 +98,7 @@ class Synapse:
         if initializer is None:
             initializer = self.random_initialize
         self.weight = initializer(self.weight)
+
         assert self.weight.shape == (
             num_presynaptic_neurons,
             num_postsynaptic_neurons,
