@@ -1,6 +1,8 @@
+import numpy as np
+
 from snn.configs import NeuronConfig
 from snn.input import RandomStimulator
-from snn.units import Neuron, Neurons
+from snn.units import Neuron, Neurons, Synapse
 
 cfg = NeuronConfig(
     rest_potential=0.0,
@@ -43,3 +45,33 @@ def test_neurons():
 
     fire_spikes, output_potentials = neurons(stimulator())
     assert len(fire_spikes) == len(output_potentials) == num_neurons
+
+
+def test_synapse():
+    num_presynaptic_neurons = 2
+    num_postsynaptic_neurons = 7
+    synapse = Synapse(num_presynaptic_neurons, num_postsynaptic_neurons, initializer=np.zeros_like)
+    potentials = [0.3, -0.3]
+    weighted_potentials = synapse(potentials)
+    np.testing.assert_equal(np.zeros_like(weighted_potentials), weighted_potentials)
+
+    num_presynaptic_neurons = 3
+    num_postsynaptic_neurons = 5
+    synapse = Synapse(num_presynaptic_neurons, num_postsynaptic_neurons, initializer=np.ones_like)
+    potentials = [1.0, 2.0, 3.0]
+    weighted_potentials = synapse(potentials)
+    np.testing.assert_equal([sum(potentials)] * num_postsynaptic_neurons, weighted_potentials)
+
+    num_presynaptic_neurons = 4
+    num_postsynaptic_neurons = 4
+    synapse = Synapse(num_presynaptic_neurons, num_postsynaptic_neurons, initializer=lambda w: np.eye(*w.shape))
+    potentials = [1.0, 2.0, 3.0, 4.0]
+    weighted_potentials = synapse(potentials)
+    np.testing.assert_equal(potentials, weighted_potentials)
+
+    num_presynaptic_neurons = 5
+    num_postsynaptic_neurons = 2
+    synapse = Synapse(num_presynaptic_neurons, num_postsynaptic_neurons)
+    potentials = [1.0, 2.0, 3.0, 4.0, 5.0]
+    weighted_potentials = synapse(potentials)
+    assert np.all(weighted_potentials[0] != weighted_potentials[1])
