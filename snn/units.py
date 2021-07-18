@@ -147,27 +147,29 @@ class ReceptiveField:
             initializer = self.initialize
         self.weight = initializer(self.weight)
 
-        assert (
-            self.weight.shape == window_shape
+        assert self.weight.shape == tuple(
+            window_shape
         ), f"Initialized weight shape {self.weight.shape} is different from {window_shape}!"
 
-    def __call__(self, input_potentials: List[List[float]]):
+    def __call__(self, image: List[List[float]]) -> np.ndarray:
+        """
+        Apply convolution for given 2D image
+
+        :param image: single color 2D image value
+        :returns: 2D potentials applied convolution shaped
+        """
         if self.pad:
             row_pad, column_pad = self.origin
-            input_potentials = np.pad(input_potentials, [(row_pad, row_pad), (column_pad, column_pad)])
+            image = np.pad(image, [(row_pad, row_pad), (column_pad, column_pad)])
 
-        sliding_windows = np.lib.stride_tricks.sliding_window_view(input_potentials, self.window_shape)
+        sliding_windows = np.lib.stride_tricks.sliding_window_view(image, self.window_shape)
         output_potentials = np.einsum("ij,klij->kl", self.weight, sliding_windows)
         return output_potentials
 
-    @staticmethod
-    def initialize(weight: np.ndarray) -> np.ndarray:
+    def initialize(self, weight: np.ndarray) -> np.ndarray:
         """Initialze weight by Manhattan Distance from center"""
-        window_shape = weight.shape
-        origin = (window_shape[0] // 2, window_shape[1] // 2)
-
-        row_distance = np.abs(np.arange(window_shape[0]) - origin[0])
-        column_distance = np.abs(np.arange(window_shape[1]) - origin[1])
+        row_distance = np.abs(np.arange(self.window_shape[0]) - self.origin[0])
+        column_distance = np.abs(np.arange(self.window_shape[1]) - self.origin[1])
         column_distance = np.expand_dims(column_distance, axis=-1)
         distance = np.zeros_like(weight) + row_distance + column_distance
 
