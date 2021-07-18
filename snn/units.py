@@ -106,7 +106,7 @@ class Synapse:
             num_postsynaptic_neurons,
         ), f"Initialized weight shape {self.weight.shape} is different from ({num_presynaptic_neurons}, {num_postsynaptic_neurons})!"
 
-    def __call__(self, input_potentials: List[float]) -> List[float]:
+    def __call__(self, input_potentials: List[float]) -> np.ndarray:
         """
         Multiply synapse weight about input_potentials and return weighted potentials
 
