@@ -1,6 +1,9 @@
-import random
+import numpy as np
 
 
 class RandomStimulator:
+    def __init__(self, shape=()):
+        self.shape = shape
+
     def __call__(self):
-        return random.randrange(0, 2)
+        return np.random.randint(0, 2, self.shape).tolist()
