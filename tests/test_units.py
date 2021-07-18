@@ -17,15 +17,13 @@ cfg = NeuronConfig(
 
 def test_neuron():
     neuron = Neuron(cfg)
-    stimulator = RandomStimulator()
 
     total_time_step = 500
     input_potentials = []
     neuron_potentials = []
     output_spikes = []
 
-    for _ in range(total_time_step):
-        input_potential = stimulator()
+    for input_potential in RandomStimulator(timestep=total_time_step):
         spike, neuron_potential = neuron(input_potential)
 
         input_potentials.append(input_potential)
@@ -42,9 +40,8 @@ def test_neuron():
 def test_neurons():
     num_neurons = 3
     neurons = Neurons(num_neurons, cfg)
-    stimulator = RandomStimulator([num_neurons])
 
-    fire_spikes, output_potentials = neurons(stimulator())
+    fire_spikes, output_potentials = neurons(next(iter(RandomStimulator([num_neurons]))))
     assert len(fire_spikes) == len(output_potentials) == num_neurons
 
     with pytest.raises(AssertionError):
