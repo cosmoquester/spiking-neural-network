@@ -14,7 +14,7 @@ class FeedForward:
         cfg: NeuronConfig,
         num_presynaptic_neurons: int,
         num_postsynaptic_neurons: int,
-        synapse_initialzer: Optional[Callable] = None,
+        synapse_initializer: Optional[Callable] = None,
     ):
         """
         Initialize FeedForward layer
@@ -22,7 +22,7 @@ class FeedForward:
         :param cfg: neuron's config
         :param num_presynaptic_neurons: the number of presynaptic neurons
         :param num_postsynaptic_neurons: the number of postsynaptic neurons
-        :param synapse_initialzer: initialzer for syanpse
+        :param synapse_initializer: initializer for syanpse
         """
         self.neurons = Neurons(num_presynaptic_neurons, cfg)
         self.synapse = Synapse(num_presynaptic_neurons, num_postsynaptic_neurons, synapse_initialzer)
