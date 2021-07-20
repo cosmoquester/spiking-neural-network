@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class NeuronConfig:
-    """Config to initialze Neuron"""
+    """Config to initialize Neuron"""
 
     #: potential when resting
     rest_potential: float
