@@ -11,7 +11,7 @@ def test_random_stimulator():
     stimulator = RandomStimulator(shape=shape, timestep=timestep)
     outputs = list(stimulator)
 
-    assert len(outputs) == timestep
+    assert len(outputs) == len(stimulator) == timestep
     np.testing.assert_equal(outputs[0].shape, shape)
 
 
@@ -25,10 +25,14 @@ def test_image_stimulator():
 
     random_image = np.random.randn(32, 32)
     stimulator.set_spike_train(random_image)
+    assert len(stimulator) == timestep
+
     outputs = list(stimulator)
     assert len(outputs) == timestep
     assert np.all(np.logical_or(outputs[0] == 0, outputs[0] == 1))
-    np.testing.assert_equal(outputs[0].shape, (32, 32))
+    np.testing.assert_equal(outputs[0].shape, [32 * 32])
+    np.testing.assert_equal(outputs[0], stimulator[0])
+    np.testing.assert_equal(outputs[0], stimulator.get(0))
 
     stimulator = ImageEncoder(ReceptiveField([1, 1], False), 10, 1.0, 0.0)
     spike_train = stimulator.rate_encoding([[3]]).squeeze()

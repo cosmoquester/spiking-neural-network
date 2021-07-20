@@ -1,4 +1,4 @@
-from typing import Iterator, List, Union
+from typing import Any, Iterator, List, Optional, Union
 
 import numpy as np
 
@@ -9,6 +9,9 @@ class RandomStimulator:
     def __init__(self, shape=(), timestep: Union[int, float] = float("inf")):
         self.shape = shape
         self.timestep = timestep
+
+    def __len__(self) -> Union[int, float]:
+        return self.timestep
 
     def __iter__(self) -> Iterator[np.ndarray]:
         """Return random value generator whose length is timestep."""
@@ -50,12 +53,23 @@ class ImageEncoder:
         if image is not None:
             self.set_spike_train(image)
 
+    def __len__(self) -> int:
+        return len(self._spike_train)
+
+    def __getitem__(self, index: int) -> List[float]:
+        return self._spike_train[index]
+
     def __iter__(self) -> Iterator[np.ndarray]:
         """Return iterator containing spike train of all timestep"""
         assert self._spike_train is not None, '"set_spike_train" method have not be called!"'
 
         for spike in self._spike_train:
             yield spike
+
+    def get(self, index: int, default: Any = None) -> List[float]:
+        if 0 <= index < len(self._spike_train):
+            return self._spike_train[index]
+        return default
 
     def set_spike_train(self, image: List[List[float]]) -> None:
         """
@@ -81,4 +95,4 @@ class ImageEncoder:
             for f_time in frequency_1d:
                 f_time[:: int(f_time[0])] = np.nan
         spike_train = np.isnan(frequency_2d).astype(np.int32).transpose((2, 0, 1))
-        return spike_train
+        return spike_train.reshape([spike_train.shape[0], -1])
