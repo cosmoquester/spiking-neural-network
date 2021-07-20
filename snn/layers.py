@@ -25,7 +25,7 @@ class FeedForward:
         :param synapse_initializer: initializer for syanpse
         """
         self.neurons = Neurons(num_presynaptic_neurons, cfg)
-        self.synapse = Synapse(num_presynaptic_neurons, num_postsynaptic_neurons, synapse_initialzer)
+        self.synapse = Synapse(num_presynaptic_neurons, num_postsynaptic_neurons, synapse_initializer)
 
     def __call__(self, input_potentials: List[float]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
