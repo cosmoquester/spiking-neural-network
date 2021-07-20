@@ -89,7 +89,7 @@ class Synapse:
 
     def __init__(self, num_presynaptic_neurons: int, num_postsynaptic_neurons: int, initializer: Callable = None):
         """
-        Initialze synapse
+        initlalize synapse
 
         :param num_presynaptic_neurons: the number of presynaptic neurons
         :param num_postsynaptic_neurons: the number of postsynaptic neurons
@@ -130,7 +130,7 @@ class ReceptiveField:
 
     def __init__(self, window_shape: Tuple[int, int], pad: bool = True, initializer: Callable = None):
         """
-        Initialze receptive field
+        initlalize receptive field
 
         :param window_shape: a tuple of windows sizes [NumWindowRows, NumWindowColumns]
         :param pad: if True, pad to keep size of output potentials as image shape
@@ -167,7 +167,7 @@ class ReceptiveField:
         return output_potentials
 
     def initialize(self, weight: np.ndarray) -> np.ndarray:
-        """Initialze weight by Manhattan Distance from center"""
+        """initlalize weight by Manhattan Distance from center"""
         row_distance = np.abs(np.arange(self.window_shape[0]) - self.origin[0])
         column_distance = np.abs(np.arange(self.window_shape[1]) - self.origin[1])
         column_distance = np.expand_dims(column_distance, axis=-1)

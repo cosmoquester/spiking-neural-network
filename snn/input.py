@@ -31,7 +31,7 @@ class ImageEncoder:
         image: List[List[float]] = None,
     ):
         """
-        Initialze ImageEncoder
+        Initialize ImageEncoder
 
         :param receptive_field: ReceptiveField for read image
         :param timestep: total number of timesteps for encoding
